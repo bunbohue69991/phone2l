@@ -1,7 +1,7 @@
 const SUPABASE_URL = "https://roynxgyqegcifhxbyctr.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_yW08oN21828j6YrZGRmMfw_humBU2ng";
 
-let supabase = null;
+let supabaseClient = null;
 let isSupabaseReady = false;
 
 if (
@@ -10,7 +10,7 @@ if (
   typeof window.supabase !== "undefined"
 ) {
   try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     isSupabaseReady = true;
   } catch (error) {
     console.warn("Supabase init failed, fallback local:", error);
@@ -195,7 +195,7 @@ on(bulkStop, "click", () => {
 on(sortToggle, "click", () => {
   sortMode = !sortMode;
   if (list) list.classList.toggle("sorting", sortMode);
-  sortToggle.textContent = sortMode ? "Xong" : "Sắp xếp";
+  if (sortToggle) sortToggle.textContent = sortMode ? "Xong" : "Sắp xếp";
 });
 
 if (generateJsonBtn && baseUrlInput && targetUrlInput && jsonLinkOutput) {
@@ -245,7 +245,7 @@ on(saveBtn, "click", async () => {
   }
 
   if (isSupabaseReady) {
-    const { error } = await supabase.from("devices").insert({
+    const { error } = await supabaseClient.from("devices").insert({
       name,
       start_url,
       stop_url,
@@ -293,7 +293,7 @@ async function loadDevices() {
   let data = [];
 
   if (isSupabaseReady) {
-    const { data: remoteData, error } = await supabase
+    const { data: remoteData, error } = await supabaseClient
       .from("devices")
       .select("*")
       .order("created_at", { ascending: true });
@@ -481,7 +481,7 @@ async function triggerWebhook(id, url, status) {
   }
 
   if (isSupabaseReady) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("devices")
       .update({ status })
       .eq("id", id);
@@ -503,7 +503,7 @@ async function triggerWebhook(id, url, status) {
 
 async function updateDevice(device, nextValues) {
   if (isSupabaseReady) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("devices")
       .update(nextValues)
       .eq("id", device.id);
@@ -654,7 +654,7 @@ async function removeDevice(id) {
   if (!ok) return;
 
   if (isSupabaseReady) {
-    const { error } = await supabase.from("devices").delete().eq("id", id);
+    const { error } = await supabaseClient.from("devices").delete().eq("id", id);
 
     if (error) {
       alert("Lỗi xóa: " + error.message);
@@ -699,7 +699,7 @@ async function persistOrder() {
 
   if (isSupabaseReady) {
     const updates = ids.map((id, index) => ({ id, sort_order: index }));
-    const { error } = await supabase.from("devices").upsert(updates);
+    const { error } = await supabaseClient.from("devices").upsert(updates);
     if (error) {
       alert("Lỗi lưu thứ tự: " + error.message);
       return;
