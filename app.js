@@ -61,6 +61,7 @@ function setLocalDevices(devices) {
 }
 
 function updateSelectedCount() {
+  if (!list || !selectedCount || !selectAll || !bulkRun || !bulkStop) return;
   const boxes = list.querySelectorAll(".pick-box");
   let count = 0;
   boxes.forEach((box) => {
@@ -126,6 +127,10 @@ const sidebarToggle = document.getElementById("sidebarToggle");
 const pageTitle = document.getElementById("pageTitle");
 const pageSubtitle = document.getElementById("pageSubtitle");
 
+const on = (el, event, handler) => {
+  if (el) el.addEventListener(event, handler);
+};
+
 tabButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     tabButtons.forEach((item) => item.classList.remove("active"));
@@ -139,31 +144,32 @@ tabButtons.forEach((btn) => {
 
     const title = btn.dataset.title || "";
     const subtitle = btn.dataset.subtitle || "";
-    pageTitle.textContent = title;
-    pageSubtitle.textContent = subtitle;
+    if (pageTitle) pageTitle.textContent = title;
+    if (pageSubtitle) pageSubtitle.textContent = subtitle;
   });
 });
 
-sidebarToggle.addEventListener("click", () => {
-  layout.classList.toggle("collapsed");
+on(sidebarToggle, "click", () => {
+  if (layout) layout.classList.toggle("collapsed");
 });
 
-addBtn.addEventListener("click", () => {
-  addPanel.classList.remove("hidden");
-  nameInput.focus();
+on(addBtn, "click", () => {
+  if (addPanel) addPanel.classList.remove("hidden");
+  if (nameInput) nameInput.focus();
 });
 
-cancelBtn.addEventListener("click", () => {
-  addPanel.classList.add("hidden");
+on(cancelBtn, "click", () => {
+  if (addPanel) addPanel.classList.add("hidden");
   resetForm();
 });
 
-clearBtn.addEventListener("click", () => {
+on(clearBtn, "click", () => {
   resetForm();
-  nameInput.focus();
+  if (nameInput) nameInput.focus();
 });
 
-selectAll.addEventListener("change", () => {
+on(selectAll, "change", () => {
+  if (!list || !selectAll) return;
   const boxes = list.querySelectorAll(".pick-box");
   boxes.forEach((box) => {
     box.checked = selectAll.checked;
@@ -171,17 +177,17 @@ selectAll.addEventListener("change", () => {
   updateSelectedCount();
 });
 
-bulkRun.addEventListener("click", () => {
+on(bulkRun, "click", () => {
   runBulk("running");
 });
 
-bulkStop.addEventListener("click", () => {
+on(bulkStop, "click", () => {
   runBulk("stopped");
 });
 
-sortToggle.addEventListener("click", () => {
+on(sortToggle, "click", () => {
   sortMode = !sortMode;
-  list.classList.toggle("sorting", sortMode);
+  if (list) list.classList.toggle("sorting", sortMode);
   sortToggle.textContent = sortMode ? "Xong" : "Sắp xếp";
 });
 
@@ -220,7 +226,8 @@ if (copyJsonBtn && jsonLinkOutput) {
   });
 }
 
-saveBtn.addEventListener("click", async () => {
+on(saveBtn, "click", async () => {
+  if (!nameInput || !startInput || !stopInput) return;
   const name = nameInput.value.trim();
   const start_url = startInput.value.trim();
   const stop_url = stopInput.value.trim();
@@ -258,7 +265,7 @@ saveBtn.addEventListener("click", async () => {
     setLocalDevices(devices);
   }
 
-  addPanel.classList.add("hidden");
+  if (addPanel) addPanel.classList.add("hidden");
   resetForm();
   await loadDevices();
 });
@@ -340,8 +347,8 @@ function renderCard(device) {
   nameEl.textContent = device.name;
   startEl.textContent = device.start_url;
   stopEl.textContent = device.stop_url;
-  noteText.value = device.note || "";
-  renderLogList(logList, logPage, device.logs || [], logPageIndex);
+  if (noteText) noteText.value = device.note || "";
+  if (logList && logPage) renderLogList(logList, logPage, device.logs || [], logPageIndex);
 
   article.dataset.id = device.id;
   const pickBox = node.querySelector(".pick-box");
@@ -362,50 +369,61 @@ function renderCard(device) {
     beginEditField(article, device, "stop_url");
   });
 
-  noteBtn.addEventListener("click", () => {
+  on(noteBtn, "click", () => {
+    if (!notePanel) return;
     notePanel.classList.toggle("active");
     notePanel.setAttribute("aria-hidden", notePanel.classList.contains("active") ? "false" : "true");
-    logPanel.classList.remove("active");
-    logPanel.setAttribute("aria-hidden", "true");
-    if (notePanel.classList.contains("active")) {
+    if (logPanel) {
+      logPanel.classList.remove("active");
+      logPanel.setAttribute("aria-hidden", "true");
+    }
+    if (notePanel.classList.contains("active") && noteText) {
       noteText.focus();
     }
   });
 
-  logBtn.addEventListener("click", () => {
+  on(logBtn, "click", () => {
+    if (!logPanel) return;
     logPanel.classList.toggle("active");
     logPanel.setAttribute("aria-hidden", logPanel.classList.contains("active") ? "false" : "true");
-    notePanel.classList.remove("active");
-    notePanel.setAttribute("aria-hidden", "true");
-    if (logPanel.classList.contains("active")) {
+    if (notePanel) {
+      notePanel.classList.remove("active");
+      notePanel.setAttribute("aria-hidden", "true");
+    }
+    if (logPanel.classList.contains("active") && logList && logPage) {
       renderLogList(logList, logPage, device.logs || [], logPageIndex);
     }
   });
 
-  logPrev.addEventListener("click", () => {
+  on(logPrev, "click", () => {
+    if (!logList || !logPage) return;
     const totalPages = getLogPageCount(device.logs || []);
     if (totalPages <= 1) return;
     logPageIndex = Math.max(1, logPageIndex - 1);
     renderLogList(logList, logPage, device.logs || [], logPageIndex);
   });
 
-  logNext.addEventListener("click", () => {
+  on(logNext, "click", () => {
+    if (!logList || !logPage) return;
     const totalPages = getLogPageCount(device.logs || []);
     if (totalPages <= 1) return;
     logPageIndex = Math.min(totalPages, logPageIndex + 1);
     renderLogList(logList, logPage, device.logs || [], logPageIndex);
   });
 
-  noteCancel.addEventListener("click", () => {
-    noteText.value = device.note || "";
-    notePanel.classList.remove("active");
-    notePanel.setAttribute("aria-hidden", "true");
+  on(noteCancel, "click", () => {
+    if (noteText) noteText.value = device.note || "";
+    if (notePanel) {
+      notePanel.classList.remove("active");
+      notePanel.setAttribute("aria-hidden", "true");
+    }
   });
 
-  noteSave.addEventListener("click", async () => {
+  on(noteSave, "click", async () => {
+    if (!noteText) return;
     const value = noteText.value.trim();
     const ok = await updateDevice(device, { note: value });
-    if (ok) {
+    if (ok && notePanel) {
       device.note = value;
       notePanel.classList.remove("active");
       notePanel.setAttribute("aria-hidden", "true");
