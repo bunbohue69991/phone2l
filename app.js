@@ -1,10 +1,16 @@
 const SUPABASE_URL = "https://roynxgyqegcifhxbyctr.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_yW08oN21828j6YrZGRmMfw_humBU2ng";
 
+const IS_LOCAL_ENV =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.protocol === "file:";
+
 let supabaseClient = null;
 let isSupabaseReady = false;
 
 if (
+  !IS_LOCAL_ENV &&
   SUPABASE_URL !== "YOUR_SUPABASE_URL" &&
   SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY" &&
   typeof window.supabase !== "undefined"
