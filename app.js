@@ -185,36 +185,40 @@ sortToggle.addEventListener("click", () => {
   sortToggle.textContent = sortMode ? "Xong" : "Sắp xếp";
 });
 
-generateJsonBtn.addEventListener("click", () => {
-  const baseUrl = baseUrlInput.value.trim();
-  if (!baseUrl) {
-    alert("Thiếu phần 1 (link cố định)");
-    return;
-  }
+if (generateJsonBtn && baseUrlInput && targetUrlInput && jsonLinkOutput) {
+  generateJsonBtn.addEventListener("click", () => {
+    const baseUrl = baseUrlInput.value.trim();
+    if (!baseUrl) {
+      alert("Thiếu phần 1 (link cố định)");
+      return;
+    }
 
-  const targetUrl = targetUrlInput.value.trim();
-  if (!targetUrl) {
-    alert("Thiếu phần 2 (link cần ghép)");
-    return;
-  }
+    const targetUrl = targetUrlInput.value.trim();
+    if (!targetUrl) {
+      alert("Thiếu phần 2 (link cần ghép)");
+      return;
+    }
 
-  jsonLinkOutput.value = buildCombinedUrl(baseUrl, targetUrl);
-});
+    jsonLinkOutput.value = buildCombinedUrl(baseUrl, targetUrl);
+  });
+}
 
-copyJsonBtn.addEventListener("click", async () => {
-  const value = jsonLinkOutput.value.trim();
-  if (!value) {
-    alert("Chưa có link để copy");
-    return;
-  }
+if (copyJsonBtn && jsonLinkOutput) {
+  copyJsonBtn.addEventListener("click", async () => {
+    const value = jsonLinkOutput.value.trim();
+    if (!value) {
+      alert("Chưa có link để copy");
+      return;
+    }
 
-  try {
-    await navigator.clipboard.writeText(value);
-  } catch (error) {
-    jsonLinkOutput.select();
-    document.execCommand("copy");
-  }
-});
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch (error) {
+      jsonLinkOutput.select();
+      document.execCommand("copy");
+    }
+  });
+}
 
 saveBtn.addEventListener("click", async () => {
   const name = nameInput.value.trim();
