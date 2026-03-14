@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phone Management</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="layout" id="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <div class="logo">PM</div>
+          <div class="brand-text">
+            <div class="brand-title">Phone Manager</div>
+            <div class="brand-sub">Bảng điều khiển</div>
+          </div>
+          <button id="sidebarToggle" class="sidebar-toggle" aria-label="Thu gọn menu">
+            |||
+          </button>
+        </div>
+        <nav class="nav">
+          <button
+            class="tab-btn active"
+            data-tab="phone"
+            data-title="Quản Lý Phone"
+            data-subtitle="Quản lý nhiều máy, bấm chạy/dừng bằng webhook."
+          >
+            <span class="tab-icon">P</span>
+            <span class="tab-text">Quản lý phone</span>
+          </button>
+          <button
+            class="tab-btn"
+            data-tab="sheets"
+            data-title="Sheets → JSON"
+            data-subtitle="Chuyển Google Sheets thành JSON nhanh."
+          >
+            <span class="tab-icon">S</span>
+            <span class="tab-text">Sheets → JSON</span>
+          </button>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <section id="tab-phone" class="tab-panel active">
+          <header class="top page-header">
+            <div>
+              <div class="tab-label">Quản lý phone</div>
+              <h1 id="pageTitle">Quản Lý Phone</h1>
+              <p id="pageSubtitle">Quản lý nhiều máy, bấm chạy/dừng bằng webhook.</p>
+            </div>
+          </header>
+
+          <section class="toolbar" aria-label="Tác vụ nhanh">
+            <label class="select-all">
+              <input id="selectAll" type="checkbox" />
+              Chọn tất cả
+            </label>
+            <span id="selectedCount" class="selected-count">0 đã chọn</span>
+            <div class="toolbar-actions">
+              <button id="sortToggle" class="ghost">Sắp xếp</button>
+              <button id="bulkRun" class="run">Chạy đã chọn</button>
+              <button id="bulkStop" class="stop-btn">Dừng đã chọn</button>
+              <button id="addBtn" class="primary">+ Thêm máy</button>
+            </div>
+          </section>
+
+          <section id="addPanel" class="panel hidden" aria-live="polite">
+            <div class="panel-head">
+              <h2>Thêm máy</h2>
+              <button id="cancelBtn" class="ghost">Đóng</button>
+            </div>
+            <div class="form-row">
+              <label>
+                Tên máy
+                <input id="nameInput" type="text" placeholder="Máy 1" />
+              </label>
+              <label>
+                Link chạy (webhook)
+                <input id="startInput" type="url" placeholder="https://..." />
+              </label>
+              <label>
+                Link dừng (webhook)
+                <input id="stopInput" type="url" placeholder="https://..." />
+              </label>
+            </div>
+            <div class="actions">
+              <button id="saveBtn" class="primary">Lưu máy</button>
+              <button id="clearBtn" class="ghost">Xóa nhập</button>
+            </div>
+            <p class="hint">Thông tin sẽ được lưu online trên Supabase.</p>
+          </section>
+
+          <main id="list" class="grid"></main>
+        </section>
+
+        <section id="tab-sheets" class="tab-panel">
+          <header class="top page-header">
+            <div>
+              <div class="tab-label">Sheets → JSON</div>
+              <h1>Sheets → JSON</h1>
+              <p>Chuyển Google Sheets thành JSON nhanh.</p>
+            </div>
+          </header>
+
+          <section class="panel" aria-live="polite">
+            <div class="panel-head">
+              <h2>Ghép link Sheets JSON</h2>
+            </div>
+            <div class="form-row">
+              <label>
+                Phần 1 (link cố định)
+                <input
+                  id="baseUrlInput"
+                  type="url"
+                  value="https://script.google.com/macros/s/AKfycbyMgJvVfN5RDvdm4A3sXSk0chahMYXwWvPTWJEfF22sxm9MOX2lc2y6bHrNs6DkpqPKLg/exec?url="
+                />
+              </label>
+              <label>
+                Phần 2 (link cần ghép)
+                <input id="targetUrlInput" type="url" placeholder="Dán link vào đây" />
+              </label>
+            </div>
+            <div class="actions">
+              <button id="generateJsonBtn" class="primary">Tạo link</button>
+            </div>
+            <div class="form-row">
+              <label>
+                Link kết quả
+                <input id="jsonLinkOutput" type="text" readonly />
+              </label>
+            </div>
+            <div class="actions">
+              <button id="copyJsonBtn" class="ghost">Copy link</button>
+            </div>
+            <p class="hint">Kết quả = phần 1 + phần 2.</p>
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <template id="cardTpl">
+      <article class="card">
+        <label class="pick">
+          <input class="pick-box" type="checkbox" />
+          <span class="pick-label">Chọn</span>
+        </label>
+        <div class="name"></div>
+        <span class="status"></span>
+        <div class="mini-link start"></div>
+        <div class="mini-link stop-link"></div>
+        <div class="card-actions">
+          <button class="run">Chạy</button>
+          <button class="stop-btn">Dừng</button>
+          <button class="note-btn ghost">Note</button>
+          <button class="log-btn ghost">Log</button>
+          <button class="remove ghost">Xóa</button>
+        </div>
+        <div class="note-panel" aria-hidden="true">
+          <textarea class="note-text" rows="3" placeholder="Ghi chú..."></textarea>
+          <div class="note-actions">
+            <button class="note-save primary">Lưu</button>
+            <button class="note-cancel ghost">Hủy</button>
+          </div>
+        </div>
+        <div class="log-panel" aria-hidden="true">
+          <div class="log-title">Nhật ký</div>
+          <div class="log-list"></div>
+          <div class="log-pager">
+            <button class="log-prev ghost">Trước</button>
+            <span class="log-page">1/1</span>
+            <button class="log-next ghost">Sau</button>
+          </div>
+        </div>
+        <button class="drag-handle" title="Kéo để sắp xếp" aria-label="Kéo để sắp xếp">≡</button>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
