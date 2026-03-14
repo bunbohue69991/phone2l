@@ -1,14 +1,21 @@
 const SUPABASE_URL = "https://roynxgyqegcifhxbyctr.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_yW08oN21828j6YrZGRmMfw_humBU2ng";
 
-const isSupabaseReady =
+let supabase = null;
+let isSupabaseReady = false;
+
+if (
   SUPABASE_URL !== "YOUR_SUPABASE_URL" &&
   SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY" &&
-  typeof window.supabase !== "undefined";
-
-const supabase = isSupabaseReady
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
+  typeof window.supabase !== "undefined"
+) {
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    isSupabaseReady = true;
+  } catch (error) {
+    console.warn("Supabase init failed, fallback local:", error);
+  }
+}
 
 const list = document.getElementById("list");
 const cardTpl = document.getElementById("cardTpl");
