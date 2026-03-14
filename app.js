@@ -199,7 +199,7 @@ on(sortToggle, "click", () => {
 });
 
 if (generateJsonBtn && baseUrlInput && targetUrlInput && jsonLinkOutput) {
-  generateJsonBtn.addEventListener("click", () => {
+  generateJsonBtn.addEventListener("click", async () => {
     const baseUrl = baseUrlInput.value.trim();
     if (!baseUrl) {
       alert("Thiếu phần 1 (link cố định)");
@@ -212,7 +212,20 @@ if (generateJsonBtn && baseUrlInput && targetUrlInput && jsonLinkOutput) {
       return;
     }
 
-    jsonLinkOutput.value = buildCombinedUrl(baseUrl, targetUrl);
+    const source = buildCombinedUrl(baseUrl, targetUrl);
+    generateJsonBtn.disabled = true;
+    const oldText = generateJsonBtn.textContent;
+    generateJsonBtn.textContent = "Đang tạo...";
+
+    try {
+      const response = await fetch(source, { redirect: "follow" });
+      jsonLinkOutput.value = response.url || source;
+    } catch {
+      jsonLinkOutput.value = source;
+    } finally {
+      generateJsonBtn.disabled = false;
+      generateJsonBtn.textContent = oldText;
+    }
   });
 }
 
